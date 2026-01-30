@@ -1,0 +1,1021 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#0b0b0f" />
+  <meta name="description" content="Semáforo Estoico: regula, decide y vuelve a tu centro en minutos." />
+  <link rel="manifest" href="manifest.json" />
+  <title>Semáforo Estoico</title>
+  <style>
+    :root{
+      --bg:#0b0b0f;
+      --card:#12121a;
+      --muted:#9aa0a6;
+      --text:#f3f4f6;
+      --line:#242438;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --radius:18px;
+
+      --red:#ff4d4d;
+      --yellow:#ffd24d;
+      --green:#4dff88;
+
+      --btn:#1a1a26;
+      --btn2:#101018;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      background: radial-gradient(1200px 700px at 20% 0%, rgba(255,77,77,.10), transparent 55%),
+                  radial-gradient(1000px 600px at 85% 10%, rgba(77,255,136,.10), transparent 55%),
+                  radial-gradient(900px 700px at 55% 90%, rgba(255,210,77,.08), transparent 60%),
+                  var(--bg);
+      color:var(--text);
+      min-height:100vh;
+      display:flex;
+      justify-content:center;
+      padding:18px;
+    }
+    .app{
+      width:min(980px, 100%);
+      display:grid;
+      gap:14px;
+      grid-template-columns: 1fr;
+    }
+    header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:14px 16px;
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(18,18,26,.78);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+    }
+    .brand{
+      display:flex; flex-direction:column;
+      gap:2px;
+    }
+    .brand .title{
+      font-weight:800; letter-spacing:.2px;
+    }
+    .brand .subtitle{
+      font-size:12px; color:var(--muted);
+    }
+    .top-actions{
+      display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+    }
+    .pill{
+      border:1px solid var(--line);
+      background: rgba(16,16,24,.7);
+      color:var(--text);
+      padding:10px 12px;
+      border-radius:999px;
+      cursor:pointer;
+      font-weight:700;
+      font-size:13px;
+      transition: transform .05s ease, background .2s ease;
+      user-select:none;
+    }
+    .pill:active{ transform: translateY(1px); }
+    .pill.secondary{ color: var(--muted); font-weight:700; }
+    .grid{
+      display:grid;
+      gap:14px;
+      grid-template-columns: 1fr;
+    }
+    @media (min-width: 980px){
+      .grid{ grid-template-columns: 1.05fr .95fr; }
+    }
+    .card{
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(18,18,26,.78);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      padding:16px;
+    }
+    .h{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:10px;
+    }
+    .h h2{
+      margin:0;
+      font-size:16px;
+      letter-spacing:.2px;
+    }
+    .h .hint{ color:var(--muted); font-size:12px; }
+    .traffic{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:10px;
+      margin-top:10px;
+    }
+    .light{
+      border:1px solid var(--line);
+      border-radius: 16px;
+      padding:14px;
+      background: rgba(16,16,24,.65);
+      cursor:pointer;
+      transition: transform .08s ease, border-color .2s ease;
+      user-select:none;
+      min-height:86px;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+      gap:8px;
+    }
+    .light:active{ transform: translateY(1px); }
+    .light .label{ font-weight:900; letter-spacing:.3px; }
+    .light .desc{ color:var(--muted); font-size:12px; line-height:1.25; }
+    .dot{
+      width:12px; height:12px;
+      border-radius:999px;
+      box-shadow: 0 0 24px rgba(255,255,255,.07);
+    }
+    .dot.red{ background: var(--red); }
+    .dot.yellow{ background: var(--yellow); }
+    .dot.green{ background: var(--green); }
+
+    .row{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+    .substates{
+      display:flex; gap:8px; flex-wrap:wrap;
+      margin-top:10px;
+    }
+    .chip{
+      border:1px solid var(--line);
+      background: rgba(16,16,24,.65);
+      padding:10px 12px;
+      border-radius:999px;
+      cursor:pointer;
+      font-weight:800;
+      font-size:13px;
+      color: var(--text);
+      transition: transform .05s ease, background .2s ease;
+      user-select:none;
+    }
+    .chip:active{ transform: translateY(1px); }
+    .chip.active{
+      border-color: rgba(255,255,255,.22);
+      background: rgba(26,26,38,.9);
+    }
+
+    .section{
+      display:grid;
+      gap:10px;
+      margin-top:12px;
+    }
+    .box{
+      border:1px solid var(--line);
+      background: rgba(16,16,24,.55);
+      border-radius: 16px;
+      padding:12px;
+    }
+    .box h3{
+      margin:0 0 8px 0;
+      font-size:13px;
+      color: var(--muted);
+      font-weight:900;
+      letter-spacing:.2px;
+    }
+    .big{
+      font-size:15px;
+      line-height:1.45;
+      font-weight:700;
+    }
+    .muted{ color: var(--muted); font-size:13px; line-height:1.35; }
+    .actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:10px;
+    }
+    button{
+      border:1px solid var(--line);
+      background: rgba(26,26,38,.85);
+      color: var(--text);
+      padding:12px 14px;
+      border-radius: 14px;
+      cursor:pointer;
+      font-weight:900;
+      letter-spacing:.2px;
+      transition: transform .05s ease, background .2s ease;
+    }
+    button:active{ transform: translateY(1px); }
+    button.ghost{
+      background: rgba(16,16,24,.45);
+      color: var(--muted);
+      font-weight:800;
+    }
+    .kpi{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+      margin-top:10px;
+    }
+    .kpi .mini{
+      border:1px solid var(--line);
+      border-radius: 16px;
+      padding:10px 12px;
+      background: rgba(16,16,24,.55);
+    }
+    .kpi .mini .t{ font-size:12px; color:var(--muted); font-weight:900; }
+    .kpi .mini .v{ font-size:14px; font-weight:900; margin-top:2px; }
+    .hr{
+      height:1px; background: var(--line);
+      margin:12px 0;
+      opacity:.9;
+    }
+    .toast{
+      position: fixed;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: 14px;
+      background: rgba(18,18,26,.92);
+      border:1px solid rgba(255,255,255,.12);
+      box-shadow: var(--shadow);
+      padding:10px 12px;
+      border-radius: 14px;
+      font-size:13px;
+      color: var(--text);
+      display:none;
+      max-width: min(560px, 92vw);
+    }
+    .toast.show{ display:block; }
+    .smalllink{ font-size:12px; color: var(--muted); text-decoration: underline; cursor:pointer; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="brand">
+        <div class="title">Semáforo Estoico™</div>
+        <div class="subtitle">Regula • Decide • Vuelve a tu centro</div>
+      </div>
+      <div class="top-actions">
+        <div class="pill" id="btnEmergency">⚠️ Emergencia</div>
+        <div class="pill secondary" id="btnMorning">🌅 Mañana</div>
+        <div class="pill secondary" id="btnNight">🌙 Noche</div>
+        <div class="pill secondary" id="btnReset">↺ Reiniciar</div>
+      </div>
+    </header>
+
+    <div class="grid">
+      <!-- LEFT -->
+      <section class="card" aria-label="Semáforo">
+        <div class="h">
+          <div>
+            <h2>¿Cómo estás ahora mismo?</h2>
+            <div class="hint">Toca un color. No necesitas explicarte.</div>
+          </div>
+          <div class="row" title="Estado actual">
+            <div class="dot" id="stateDot"></div>
+            <div style="font-weight:900" id="stateLabel">—</div>
+          </div>
+        </div>
+
+        <div class="traffic">
+          <div class="light" data-state="red">
+            <div class="row">
+              <div class="dot red"></div>
+              <div class="label">ROJO</div>
+            </div>
+            <div class="desc">Saturada / desbordada. Primero regular, luego decidir.</div>
+          </div>
+          <div class="light" data-state="yellow">
+            <div class="row">
+              <div class="dot yellow"></div>
+              <div class="label">AMARILLO</div>
+            </div>
+            <div class="desc">Reactiva / inestable. Pausar y ordenar antes de actuar.</div>
+          </div>
+          <div class="light" data-state="green">
+            <div class="row">
+              <div class="dot green"></div>
+              <div class="label">VERDE</div>
+            </div>
+            <div class="desc">Clara / estable. Acción mínima y virtuosa.</div>
+          </div>
+        </div>
+
+        <div class="hr"></div>
+
+        <div>
+          <div class="muted"><b>Subestado</b> (elige uno para personalizar la guía):</div>
+          <div class="substates" id="substates"></div>
+          <div class="muted" style="margin-top:8px">
+            Tip: si no sabes cuál elegir, toca el que más se siente en el cuerpo.
+          </div>
+        </div>
+
+        <div class="section" id="dynamicBlocks"></div>
+      </section>
+
+      <!-- RIGHT -->
+      <aside class="card" aria-label="Panel diario">
+        <div class="h">
+          <div>
+            <h2>Tu tablero diario</h2>
+            <div class="hint">Pequeños pasos que devuelven tranquilidad.</div>
+          </div>
+          <div class="smalllink" id="btnInstallHint">¿Cómo instalar?</div>
+        </div>
+
+        <div class="box">
+          <h3>Modo rápido (30–60s)</h3>
+          <div class="big" id="quickTitle">Elige un color para empezar.</div>
+          <div class="muted" id="quickBody">El sistema se adapta a tu estado.</div>
+          <div class="actions">
+            <button id="btnOneMinute">⏱️ 1 minuto de calma</button>
+            <button class="ghost" id="btnOneLine">✍️ Frase de 1 línea</button>
+          </div>
+        </div>
+
+        <div class="kpi">
+          <div class="mini">
+            <div class="t">Racha (días)</div>
+            <div class="v" id="streak">0</div>
+          </div>
+          <div class="mini">
+            <div class="t">Último estado</div>
+            <div class="v" id="lastState">—</div>
+          </div>
+        </div>
+
+        <div class="hr"></div>
+
+        <div class="box">
+          <h3>Ritual mañana (2 min)</h3>
+          <div class="muted" id="morningText">Define intención + control antes de que el día te arrastre.</div>
+          <div class="actions">
+            <button class="ghost" id="btnMorningOpen">Abrir ritual</button>
+          </div>
+        </div>
+
+        <div class="box">
+          <h3>Cierre noche (1 min)</h3>
+          <div class="muted" id="nightText">Suelta el día sin culpa. Refuerza tu centro.</div>
+          <div class="actions">
+            <button class="ghost" id="btnNightOpen">Abrir cierre</button>
+          </div>
+        </div>
+
+        <div class="box">
+          <h3>Biblioteca práctica</h3>
+          <div class="muted">Acceso rápido a mini-prácticas: límites, rumiación, culpa, autoridad.</div>
+          <div class="actions">
+            <button class="ghost" data-lib="limites">Límites</button>
+            <button class="ghost" data-lib="rumiacion">Rumiación</button>
+            <button class="ghost" data-lib="culpa">Culpa</button>
+            <button class="ghost" data-lib="autoridad">Autoridad</button>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ---------- PWA SW ----------
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+    }
+
+    // ---------- Data (no IA, pero dinámico) ----------
+    // Variación: cada subestado tiene varias salidas. Elegimos según "día del año" + un poco de aleatoriedad controlada.
+    const DATA = {
+      red: {
+        label: "ROJO",
+        dotClass: "red",
+        substates: [
+          { key:"ansiedad",  name:"Ansiedad" },
+          { key:"ira",       name:"Ira" },
+          { key:"culpa",     name:"Culpa" },
+          { key:"saturacion",name:"Saturación" }
+        ],
+        outputs: {
+          ansiedad: [
+            {
+              lectura: "Tu sistema está en alerta. No es momento de decidir ni de explicar.",
+              protocolo: [
+                "Respira 4–6 durante 60 segundos (inhala 4, exhala 6).",
+                "Relaja mandíbula y hombros. Baja el cuerpo antes de negociar con la mente.",
+                "Pospone cualquier respuesta importante 24h."
+              ],
+              ancla: "Nada importante se decide desde la urgencia.",
+              micro: "Si tienes que contestar hoy: “Lo reviso mañana con calma.”"
+            },
+            {
+              lectura: "La ansiedad quiere certeza inmediata. Tú eliges calma primero.",
+              protocolo: [
+                "Pon ambos pies en el suelo y nombra 3 cosas que ves.",
+                "Exhala largo 5 veces. Alarga la exhalación.",
+                "Cierra el tema por hoy: no más vueltas mentales."
+              ],
+              ancla: "Lo que controlas es tu próxima acción, no el futuro.",
+              micro: "Acción mínima: agua + 10 respiraciones + cerrar pantalla."
+            },
+            {
+              lectura: "Estás sobrecargada. El pensamiento rápido aquí es un mal asesor.",
+              protocolo: [
+                "Haz una pausa física: levántate y camina 2 minutos.",
+                "Repite: “Ahora no decido.”",
+                "Vuelve cuando tu intensidad baje a 6 o menos."
+              ],
+              ancla: "Tu paz vale más que una respuesta perfecta.",
+              micro: "Si te presionan: “Necesito tiempo. Te respondo mañana.”"
+            }
+          ],
+          ira: [
+            {
+              lectura: "La ira te empuja a corregir ya. Primero recupera el control interno.",
+              protocolo: [
+                "Detén el impulso: manos abiertas, exhala largo 6 veces.",
+                "No escribas mensajes largos. No discutas en caliente.",
+                "Pasa de reacción a límite: breve y firme."
+              ],
+              ancla: "Firmeza no es violencia. Es claridad.",
+              micro: "Frase útil: “No continúo esta conversación así. Luego hablamos.”"
+            },
+            {
+              lectura: "Estás activada. Si actúas ahora, pierdes precisión.",
+              protocolo: [
+                "Baja la temperatura: agua fría en manos 20 segundos.",
+                "Pon un ‘alto’ interno: “No hoy.”",
+                "Si necesitas salida: aléjate 10 minutos."
+              ],
+              ancla: "Tu dignidad se nota más en tu autocontrol.",
+              micro: "Si hay presión: “Ahora no. Retomamos después.”"
+            },
+            {
+              lectura: "La ira busca justicia instantánea. Tu poder es elegir la forma.",
+              protocolo: [
+                "Respira y baja hombros.",
+                "Decide objetivo: ¿quieres ganar o quieres paz + respeto?",
+                "Elige una acción mínima, no un ataque."
+              ],
+              ancla: "Actúa con virtud, no con impulso.",
+              micro: "Acción mínima: escribir 3 líneas y guardarlas sin enviar."
+            }
+          ],
+          culpa: [
+            {
+              lectura: "La culpa exagera tu responsabilidad. Ajusta tu carga a lo real.",
+              protocolo: [
+                "Pregunta: ¿qué parte sí depende de ti y cuál no?",
+                "Corta la autoacusación: hechos, no etiquetas.",
+                "Repara solo lo necesario, sin humillarte."
+              ],
+              ancla: "Responsabilidad no es castigo.",
+              micro: "Frase útil: “Lo siento por X. Haré Y. Fin.”"
+            },
+            {
+              lectura: "La culpa te quiere dócil. El estoicismo te quiere íntegra.",
+              protocolo: [
+                "Identifica: ¿culpa sana (acción) o culpa tóxica (castigo)?",
+                "Si hay acción: haz una reparación concreta.",
+                "Si es tóxica: suelta y cierra el tema hoy."
+              ],
+              ancla: "No eres tus errores. Eres tu corrección.",
+              micro: "Acción mínima: una reparación + no rumiar 30 min."
+            },
+            {
+              lectura: "Si estás en ROJO, la culpa miente más fuerte.",
+              protocolo: [
+                "No pidas perdón en caliente.",
+                "Espera a estar en AMARILLO o VERDE.",
+                "Escribe una línea: qué aprendiste. Nada más."
+              ],
+              ancla: "El autocontrol es tu forma de respeto propio.",
+              micro: "Si te piden respuesta: “Lo pienso y te digo mañana.”"
+            }
+          ],
+          saturacion: [
+            {
+              lectura: "Tu mente está llena. Aquí no se resuelve: se descarga.",
+              protocolo: [
+                "Haz lista rápida: 3 cosas urgentes, 3 no urgentes.",
+                "Elige 1 micro-tarea (5 min) o descansa.",
+                "Cierra entradas: notificaciones fuera 30 min."
+              ],
+              ancla: "Simplicidad es poder.",
+              micro: "Acción mínima: 5 min de orden y parar."
+            },
+            {
+              lectura: "Estás en modo supervivencia. Reduce estímulos.",
+              protocolo: [
+                "Apaga ruido: baja brillo, silencia, respira.",
+                "Baja expectativas: hoy solo lo esencial.",
+                "Pide espacio: no expliques de más."
+              ],
+              ancla: "No todo merece tu energía.",
+              micro: "Frase útil: “Hoy no puedo con eso. Lo vemos mañana.”"
+            },
+            {
+              lectura: "La saturación no se piensa, se gestiona.",
+              protocolo: [
+                "Cuerpo primero: agua, comida simple, 5 respiraciones.",
+                "Define: ¿qué puedes soltar hoy sin culpa?",
+                "Elige una sola prioridad."
+              ],
+              ancla: "Priorizar es protegerte.",
+              micro: "Acción mínima: elegir 1 prioridad + decir ‘no’ a 1 cosa."
+            }
+          ]
+        }
+      },
+
+      yellow: {
+        label: "AMARILLO",
+        dotClass: "yellow",
+        substates: [
+          { key:"quiero_responder", name:"Quiero responder" },
+          { key:"quiero_explicar",  name:"Quiero explicar" },
+          { key:"quiero_huir",      name:"Quiero huir" },
+          { key:"confusion",        name:"Confusión" }
+        ],
+        outputs: {
+          quiero_responder: [
+            {
+              lectura: "Estás cerca de reaccionar. Responde breve o espera.",
+              filtros: ["¿Esto depende de ti? (sí/parcial/no)", "¿Involucra a otra persona? (sí/no)"],
+              decision: "Si es parcial: actúa sin apego. Si es no: suelta.",
+              micro: "Regla: 1 mensaje, 1 intención, 1 línea."
+            },
+            {
+              lectura: "No necesitas decir todo lo que piensas para estar en paz.",
+              filtros: ["¿Tu respuesta busca claridad o aprobación?", "¿Puedes esperar 2 horas sin perder nada?"],
+              decision: "Si puedes esperar: espera. La calma mejora tu precisión.",
+              micro: "Plantilla: “Entiendo. Lo reviso y te digo luego.”"
+            },
+            {
+              lectura: "Responde solo cuando tu cuerpo esté tranquilo.",
+              filtros: ["¿Intensidad ≤ 6?", "¿Tu tono sería firme sin agresión?"],
+              decision: "Si no: pospone. Si sí: acción mínima.",
+              micro: "Acción mínima: 1 frase + punto final."
+            }
+          ],
+          quiero_explicar: [
+            {
+              lectura: "Explicar de más suele ser miedo disfrazado de lógica.",
+              filtros: ["¿Explicar te hace respetarte o te hace justificarte?", "¿Qué es lo mínimo que necesitas decir?"],
+              decision: "Di lo mínimo. Guarda lo demás.",
+              micro: "Frase: “Esto es lo que haré: X.”"
+            },
+            {
+              lectura: "La dignidad no se negocia con párrafos.",
+              filtros: ["¿La otra persona está disponible para entender?", "¿Tu objetivo es resolver o convencer?"],
+              decision: "Si es convencer: detente. Si es resolver: 2 líneas.",
+              micro: "Regla: máximo 2 líneas, sin historia."
+            },
+            {
+              lectura: "Tu claridad vale más que tu explicación.",
+              filtros: ["¿Qué límite necesitas?", "¿Qué resultado NO controlas?"],
+              decision: "Límite claro, desapego del resultado.",
+              micro: "Frase: “No me funciona así. Prefiero X.”"
+            }
+          ],
+          quiero_huir: [
+            {
+              lectura: "Huir calma hoy, pero cobra mañana. Elige micro-valentía.",
+              filtros: ["¿Es peligro real o incomodidad?", "¿Qué paso mínimo puedes dar?"],
+              decision: "Paso mínimo hoy. Lo demás después.",
+              micro: "Acción mínima: 5 minutos + parar."
+            },
+            {
+              lectura: "No tienes que resolverlo todo para moverte.",
+              filtros: ["¿Qué es lo esencial?", "¿Qué puedes delegar/posponer sin culpa?"],
+              decision: "Reduce. Decide una sola cosa.",
+              micro: "Acción mínima: elegir 1 y decir no a 1."
+            },
+            {
+              lectura: "Tu mente quiere escapar. Tu carácter quiere avanzar.",
+              filtros: ["¿Cuál es la opción más digna (aunque sea incómoda)?", "¿Qué controlas exactamente?"],
+              decision: "Actúa sobre lo que controlas.",
+              micro: "Frase: “Hoy doy el primer paso.”"
+            }
+          ],
+          confusion: [
+            {
+              lectura: "Cuando hay confusión, vuelve a lo básico: control y valor.",
+              filtros: ["¿Qué controlas hoy?", "¿Qué valor quieres honrar (respeto, calma, verdad)?"],
+              decision: "Elige 1 valor y una acción mínima coherente.",
+              micro: "Acción mínima: 1 decisión pequeña ahora."
+            },
+            {
+              lectura: "No necesitas certeza total. Necesitas dirección.",
+              filtros: ["¿Qué opción te deja más tranquila mañana?", "¿Qué opción te hace perderte?"],
+              decision: "Elige lo que te conserve.",
+              micro: "Frase: “Me elijo. Luego decido.”"
+            },
+            {
+              lectura: "Si dudas, baja el costo: decide lo reversible primero.",
+              filtros: ["¿Esto es reversible?", "¿Cuál es el paso más pequeño posible?"],
+              decision: "Paso pequeño, sin drama.",
+              micro: "Acción mínima: 10 minutos y reevaluas."
+            }
+          ]
+        }
+      },
+
+      green: {
+        label: "VERDE",
+        dotClass: "green",
+        substates: [
+          { key:"decidir",  name:"Decidir" },
+          { key:"limite",   name:"Poner límite" },
+          { key:"actuar",   name:"Actuar" },
+          { key:"soltar",   name:"Soltar" }
+        ],
+        outputs: {
+          decidir: [
+            {
+              lectura: "Estás clara. Decide sin rumiación.",
+              plan: ["Define 1 objetivo.", "Elige 1 acción mínima hoy.", "Pon hora de ejecución."],
+              ancla: "Haz lo correcto ahora.",
+              micro: "Regla: decide y cierra el tema."
+            },
+            {
+              lectura: "Decidir es cortar opciones, no abrirlas.",
+              plan: ["Elige entre A/B.", "Asume el costo con calma.", "Avanza sin mirar atrás."],
+              ancla: "La paz viene de la coherencia.",
+              micro: "Acción mínima: elige y calendariza."
+            },
+            {
+              lectura: "Tu claridad es un recurso. Úsalo.",
+              plan: ["Escribe 1 línea: ‘Hoy elijo…’", "Haz 1 acción en 5 min.", "Cierra distracciones 20 min."],
+              ancla: "Disciplina es autocuidado.",
+              micro: "Acción mínima: 5 minutos ahora."
+            }
+          ],
+          limite: [
+            {
+              lectura: "Un límite es una instrucción, no una discusión.",
+              plan: ["Di el límite en 1 frase.", "Di la consecuencia en 1 frase.", "Fin."],
+              ancla: "Firmeza con calma.",
+              micro: "Frase: “No me funciona X. Haré Y.”"
+            },
+            {
+              lectura: "Poner límites es elegirte sin atacar.",
+              plan: ["Tono neutro.", "Contenido breve.", "Sin justificarte."],
+              ancla: "Tu valor no se negocia.",
+              micro: "Regla: máximo 2 líneas."
+            },
+            {
+              lectura: "Los límites sostienen tu tranquilidad.",
+              plan: ["Define qué permites.", "Comunícalo.", "Sosténlo con constancia."],
+              ancla: "Constancia > intensidad.",
+              micro: "Acción mínima: enviar 1 frase hoy."
+            }
+          ],
+          actuar: [
+            {
+              lectura: "Acción mínima, impacto real.",
+              plan: ["Empieza 5 min.", "Elimina 1 distracción.", "Termina 1 cosa pequeña."],
+              ancla: "Lo perfecto llega tarde. Lo hecho trae paz.",
+              micro: "Regla: empieza antes de sentirte lista."
+            },
+            {
+              lectura: "Actúa con virtud: claridad, respeto, verdad.",
+              plan: ["Haz lo correcto sin espectáculo.", "No busques aprobación.", "Evalúa después."],
+              ancla: "Tu carácter es tu norte.",
+              micro: "Acción mínima: un paso hoy."
+            },
+            {
+              lectura: "Tu energía está disponible: úsala bien.",
+              plan: ["Una tarea.", "Un bloque de tiempo.", "Un cierre."],
+              ancla: "Enfocar es ganar.",
+              micro: "Acción mínima: 20 min en silencio."
+            }
+          ],
+          soltar: [
+            {
+              lectura: "Soltar es dejar de cargar lo que no controlas.",
+              plan: ["Nombra qué no controlas.", "Devuélvelo mentalmente.", "Vuelve a tu próxima acción."],
+              ancla: "Aceptación no es rendición. Es libertad.",
+              micro: "Acción mínima: cerrar el tema por hoy."
+            },
+            {
+              lectura: "Si no depende de ti, no merece tu paz.",
+              plan: ["Identifica el ‘otros’ / ‘pasado’.", "Corta la rumiación con un límite interno.", "Haz algo simple ahora."],
+              ancla: "Tu paz es prioridad.",
+              micro: "Acción mínima: 10 respiraciones + moverte."
+            },
+            {
+              lectura: "Suelta el juicio excesivo. Quédate con el aprendizaje.",
+              plan: ["Aprendizaje en 1 línea.", "Acción en 1 línea.", "Cierre."],
+              ancla: "Menos juicio, más dirección.",
+              micro: "Acción mínima: escribir 2 líneas y cerrar."
+            }
+          ]
+        }
+      }
+    };
+
+    // Biblioteca práctica (mini-prácticas sin IA)
+    const LIB = {
+      limites: {
+        title: "Límites (2 minutos)",
+        body: [
+          "1) Escribe: ‘No me funciona ___’.",
+          "2) Define: ‘Prefiero ___’.",
+          "3) Cierra: ‘Gracias por entender’.",
+          "Regla: sin justificarte, sin historia."
+        ]
+      },
+      rumiacion: {
+        title: "Rumiación (90 segundos)",
+        body: [
+          "1) Nombra: ‘Estoy rumiando’.",
+          "2) Pregunta: ‘¿Esto lo controlo?’",
+          "3) Si no: vuelve al cuerpo (5 exhalaciones largas).",
+          "4) Haz una micro-acción (agua, caminar, ordenar 1 cosa)."
+        ]
+      },
+      culpa: {
+        title: "Culpa (2 minutos)",
+        body: [
+          "1) Separa: culpa sana (acción) vs culpa tóxica (castigo).",
+          "2) Si hay acción: repara en 1 paso concreto.",
+          "3) Si es tóxica: suelta hoy. No te castigues para ‘pagar’."
+        ]
+      },
+      autoridad: {
+        title: "Autoridad (2 minutos)",
+        body: [
+          "1) Hecho, sin adjetivos.",
+          "2) Objetivo: respeto + claridad.",
+          "3) Mensaje máximo 2 líneas.",
+          "4) Si estás activada: pospone 24h."
+        ]
+      }
+    };
+
+    // ---------- State ----------
+    const LS = {
+      get(k, d=null){ try{ const v = localStorage.getItem(k); return v? JSON.parse(v): d; }catch{ return d; } },
+      set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch{} }
+    };
+
+    const appState = {
+      state: LS.get("se_state", null),
+      sub: LS.get("se_sub", null),
+      streak: LS.get("se_streak", {count:0, lastDate:null}),
+      lastState: LS.get("se_lastState", null),
+    };
+
+    const el = (id)=>document.getElementById(id);
+    const toast = (msg)=>{
+      const t = el("toast");
+      t.textContent = msg;
+      t.classList.add("show");
+      clearTimeout(window.__t);
+      window.__t = setTimeout(()=>t.classList.remove("show"), 2400);
+    };
+
+    // "Variación" determinista por día + pequeña aleatoriedad para no clavar siempre el mismo resultado.
+    function pickVariant(arr){
+      const day = Math.floor(Date.now() / 86400000);
+      const salt = Math.floor(Math.random()*7);
+      const idx = (day + salt) % arr.length;
+      return arr[idx];
+    }
+
+    function updateStreak(){
+      const today = new Date().toISOString().slice(0,10);
+      const s = appState.streak || {count:0, lastDate:null};
+      if (s.lastDate === today) return;
+      // si ayer fue el último, suma; si no, reinicia a 1
+      const yesterday = new Date(Date.now()-86400000).toISOString().slice(0,10);
+      if (s.lastDate === yesterday) s.count = (s.count||0) + 1;
+      else s.count = 1;
+      s.lastDate = today;
+      appState.streak = s;
+      LS.set("se_streak", s);
+    }
+
+    function setState(stateKey){
+      appState.state = stateKey;
+      LS.set("se_state", stateKey);
+      appState.lastState = stateKey;
+      LS.set("se_lastState", stateKey);
+      updateStreak();
+      render();
+    }
+
+    function setSub(subKey){
+      appState.sub = subKey;
+      LS.set("se_sub", subKey);
+      render();
+    }
+
+    function resetAll(){
+      ["se_state","se_sub"].forEach(k=>localStorage.removeItem(k));
+      toast("Reiniciado.");
+      appState.state=null; appState.sub=null;
+      render();
+    }
+
+    function renderSubstates(){
+      const wrap = el("substates");
+      wrap.innerHTML = "";
+      if (!appState.state){
+        wrap.innerHTML = `<span class="muted">Elige un color primero.</span>`;
+        return;
+      }
+      const subs = DATA[appState.state].substates;
+      subs.forEach(s=>{
+        const c = document.createElement("div");
+        c.className = "chip" + (appState.sub===s.key ? " active": "");
+        c.textContent = s.name;
+        c.onclick = ()=> setSub(s.key);
+        wrap.appendChild(c);
+      });
+      if (!appState.sub) {
+        // autoselección suave: primera opción
+        setSub(subs[0].key);
+      }
+    }
+
+    function renderDynamic(){
+      const blocks = el("dynamicBlocks");
+      blocks.innerHTML = "";
+      if (!appState.state || !appState.sub) return;
+
+      const st = DATA[appState.state];
+      const dot = el("stateDot");
+      dot.className = "dot " + st.dotClass;
+      el("stateLabel").textContent = st.label;
+
+      // Pick a dynamic output
+      const out = pickVariant(st.outputs[appState.sub]);
+
+      // Left card: dynamic blocks
+      const makeBox = (title, html)=>{
+        const b = document.createElement("div");
+        b.className = "box";
+        b.innerHTML = `<h3>${title}</h3>${html}`;
+        return b;
+      };
+
+      // Common: lectura
+      blocks.appendChild(makeBox("Lectura del sistema", `<div class="big">${escapeHtml(out.lectura || "")}</div>`));
+
+      // Protocol / Plan
+      if (out.protocolo){
+        const items = out.protocolo.map(x=>`<li>${escapeHtml(x)}</li>`).join("");
+        blocks.appendChild(makeBox("Protocolo (hazlo ahora)", `<ul class="muted" style="margin:0; padding-left:18px">${items}</ul>`));
+      }
+      if (out.plan){
+        const items = out.plan.map(x=>`<li>${escapeHtml(x)}</li>`).join("");
+        blocks.appendChild(makeBox("Plan mínimo", `<ul class="muted" style="margin:0; padding-left:18px">${items}</ul>`));
+      }
+      if (out.filtros){
+        const items = out.filtros.map(x=>`<li>${escapeHtml(x)}</li>`).join("");
+        blocks.appendChild(makeBox("Filtros rápidos", `<ul class="muted" style="margin:0; padding-left:18px">${items}</ul>`));
+      }
+      if (out.decision){
+        blocks.appendChild(makeBox("Decisión recomendada", `<div class="big">${escapeHtml(out.decision)}</div>`));
+      }
+
+      // Ancla / Micro
+      if (out.ancla){
+        blocks.appendChild(makeBox("Ancla estoica", `<div class="big">${escapeHtml(out.ancla)}</div>`));
+      }
+      if (out.micro){
+        blocks.appendChild(makeBox("Micro-acción", `<div class="big">${escapeHtml(out.micro)}</div>`));
+      }
+
+      // Quick panel
+      el("quickTitle").textContent = `${st.label} • ${humanSub(appState.state, appState.sub)}`;
+      el("quickBody").textContent = out.micro ? out.micro : (out.ancla || "Haz una micro-acción y cierra el tema por hoy.");
+
+      // Metrics
+      el("streak").textContent = (appState.streak?.count ?? 0);
+      el("lastState").textContent = appState.lastState ? DATA[appState.lastState].label : "—";
+    }
+
+    function humanSub(stateKey, subKey){
+      const st = DATA[stateKey];
+      const s = st.substates.find(x=>x.key===subKey);
+      return s ? s.name : "—";
+    }
+
+    function render(){
+      // dot + label default
+      if (!appState.state){
+        el("stateDot").className = "dot";
+        el("stateLabel").textContent = "—";
+        el("quickTitle").textContent = "Elige un color para empezar.";
+        el("quickBody").textContent = "El sistema se adapta a tu estado.";
+      }
+      renderSubstates();
+      renderDynamic();
+
+      // Buttons state
+      el("streak").textContent = (appState.streak?.count ?? 0);
+      el("lastState").textContent = appState.lastState ? DATA[appState.lastState].label : "—";
+    }
+
+    function escapeHtml(str){
+      return String(str).replace(/[&<>"']/g, m => ({
+        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+      }[m]));
+    }
+
+    // ---------- Events ----------
+    document.querySelectorAll(".light").forEach(x=>{
+      x.addEventListener("click", ()=> setState(x.dataset.state));
+    });
+
+    el("btnEmergency").onclick = ()=>{
+      setState("red");
+      toast("Modo emergencia: primero calma, luego decisión.");
+      // Forzamos subestado útil por defecto
+      setSub("ansiedad");
+      // Scroll al contenido
+      window.scrollTo({top: 0, behavior:"smooth"});
+    };
+
+    el("btnReset").onclick = resetAll;
+
+    // Quick actions
+    el("btnOneMinute").onclick = ()=>{
+      if (!appState.state) return toast("Primero elige un color.");
+      // acción 1 minuto según estado
+      if (appState.state === "red"){
+        toast("1 minuto: 6 exhalaciones largas + relaja mandíbula.");
+      } else if (appState.state === "yellow"){
+        toast("1 minuto: escribe 1 intención en tu mente y reduce a 1 frase.");
+      } else {
+        toast("1 minuto: elige 1 acción mínima y pon hora.");
+      }
+    };
+
+    el("btnOneLine").onclick = ()=>{
+      if (!appState.state) return toast("Primero elige un color.");
+      const lines = {
+        red: [
+          "Ahora no decido.",
+          "Calma primero.",
+          "No me explico hoy."
+        ],
+        yellow: [
+          "Una frase, no un discurso.",
+          "Pauso y ordeno.",
+          "Actúo con medida."
+        ],
+        green: [
+          "Acción mínima hoy.",
+          "Hago lo correcto ahora.",
+          "Decido y cierro."
+        ]
+      };
+      toast(pickVariant(lines[appState.state]));
+    };
+
+    // Rituals (simple modals via toast)
+    function openMorning(){
+      toast("Mañana: 1) ¿Qué emoción predomina hoy? 2) ¿Qué sí controlas hoy? 3) Elige 1 intención.");
+      // marca uso
+      updateStreak();
+      el("streak").textContent = (appState.streak?.count ?? 0);
+    }
+    function openNight(){
+      toast("Noche: 1) ¿Qué solté hoy? 2) ¿Dónde actué con dignidad? 3) ¿Qué haré distinto mañana?");
+      updateStreak();
+      el("streak").textContent = (appState.streak?.count ?? 0);
+    }
+    el("btnMorning").onclick = openMorning;
+    el("btnNight").onclick = openNight;
+    el("btnMorningOpen").onclick = openMorning;
+    el("btnNightOpen").onclick = openNight;
+
+    // Library
+    document.querySelectorAll("[data-lib]").forEach(b=>{
+      b.addEventListener("click", ()=>{
+        const k = b.getAttribute("data-lib");
+        const item = LIB[k];
+        if (!item) return;
+        toast(item.title + " — " + item.body.join(" "));
+      });
+    });
+
+    // Install hint
+    el("btnInstallHint").onclick = ()=>{
+      toast("Instalar: en Chrome móvil → menú ⋮ → “Agregar a pantalla principal”. En iPhone → compartir → “Agregar a pantalla de inicio”.");
+    };
+
+    // Init
+    render();
+  </script>
+</body>
+</html>
